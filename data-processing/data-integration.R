@@ -113,4 +113,4 @@ master_df <- master_df %>%
   ungroup()
 
 # Export
-write_csv(master_df, "total_data.csv")
+write_csv(master_df, "all_data.csv")
