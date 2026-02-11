@@ -4,8 +4,11 @@ library(ggplot2)
 
 # 1. Load original data
 data <- read_csv("all_data.csv")
-translink_ridership <- read_csv("data/translink.csv")
-combined_data <- bind_rows(data, translink_ridership)
+
+combined_data <- data
+
+# translink_ridership <- read_csv("data/translink.csv")
+# combined_data <- bind_rows(data, translink_ridership)
 
 # we see that Vancouver's true monthly upt tracks nicely with Portland and Seattle, but we just don't have the data...
 # Seattle's upt does seem to increase more abruptly post pandemic - hard to say.
@@ -15,8 +18,8 @@ ggplot(combined_data, aes(x = date, y = total_upt, color = city, group = city)) 
   geom_line(linewidth = 1) +
   geom_point(alpha = 0.5) +
   labs(
-    title = "Total UPT (Unlinked Passenger Trips) Over Time",
-    subtitle = "Comparing Seattle, Portland, Vancouver, and Vancouver (Translink)",
+  title = "Total UPT (Unlinked Passenger Trips) Over Time",
+  #   subtitle = "Comparing Seattle, Portland, Vancouver, and Vancouver (Translink)",
     x = "Date",
     y = "Total UPT",
     color = "City Source"
@@ -71,8 +74,39 @@ ggplot(post_covid, aes(date, total_upt, color = city)) +
   labs(title = "Post-Pandemic Recovery Trends")
 
 
+# Filter for Seattle and Portland and select modal share columns
+modal_trends <- data %>%
+  filter(city %in% c("Seattle", "Portland")) %>%
+  select(date, city, pct_drove_alone, pct_public_transit, 
+         pct_work_from_home, pct_walked, pct_bicycle, pct_taxi_or_ride_share) %>%
+  # Pivot to long format for ggplot
+  pivot_longer(cols = starts_with("pct_"), 
+               names_to = "mode", 
+               values_to = "percentage") %>%
+  # Clean up names for a prettier legend
+  mutate(mode = str_replace_all(mode, "pct_", ""),
+         mode = str_replace_all(mode, "_", " "),
+         mode = str_to_title(mode)) %>%
+  # Remove NAs to keep the plot clean
+  filter(!is.na(percentage))
 
-
+ggplot(modal_trends, aes(x = date, y = percentage, color = mode)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 2) +
+  facet_wrap(~city) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  labs(
+    title = "Annual Commute Mode Share: Seattle vs. Portland",
+    subtitle = "Data source: American Community Survey (ACS) 1-Year Estimates",
+    x = "Year",
+    y = "Percentage of Commuters",
+    color = "Mode of Travel"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(size = 12, face = "bold")
+  )
 
 
 
