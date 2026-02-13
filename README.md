@@ -1,4 +1,4 @@
-# Disentangling Regulatory and Pandemic Effects
+# Estimating the Impact of Seattle's ``Fare Share'' Ordinance on Transit Ridership Using Bayesian State-Space and Synthetic Control Methods
 
 ## Project Overview
 
